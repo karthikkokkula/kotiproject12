@@ -1,0 +1,11 @@
+pipeline {
+    agent any {
+        stages {
+            stage ("cloning") {
+                steps {
+                    sh ''' git 'https://github.com/karthikkokkula/kotiproject12.git' '''
+                }
+            }
+        }
+    }
+}
