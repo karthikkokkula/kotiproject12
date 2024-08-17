@@ -1,10 +1,35 @@
 pipeline {
-    agent any {
-        stages {
-            stage ("cloning") {
-                steps {
-                    sh ''' git 'https://github.com/karthikkokkula/kotiproject12.git' '''
+    agent any
+    stages {
+        stage('clone') {
+            steps {
+                git branch: 'main', url: 'https://github.com/karthikkokkula/kotiproject12.git'
+            }
+        }
+        stage('build a docker file') {
+            steps {
+                sh 'docker build -t todayfile .'
+            }
+        }
+        stage('push to docker hub') {
+            steps {
+                script {
+                    // Tag the Docker image
+                    sh 'docker tag todayfile karthikkokkula/todayfile:02'
+                    
+                    // Push the Docker image to Docker Hub with specified credentials
+                    withDockerRegistry(credentialsId: 'c7722ae6-b4fe-4000-8a64-72845c39c064') {
+                        sh 'docker push karthikkokkula/todayfile:02'
+                    }
                 }
+            }
+        }
+        stage('deploy the image to container') {
+            steps {
+                sh '''
+                docker pull karthikkokkula/todayfile:02
+                docker run --name dockerservice -d -p 99:80 karthikkokkula/todayfile:02
+                '''
             }
         }
     }
